@@ -15,7 +15,7 @@ tokenizer = GPT2Tokenizer.from_pretrained(
 )
 model = GPT2LMHeadModel.from_pretrained("gpt2", pad_token_id=tokenizer.eos_token_id)
 
-inputs = tokenizer.encode("Today I was", return_tensors="pt")
+inputs = tokenizer.encode("Today at lunch", return_tensors="pt")
 outputs = model.generate(
     inputs,
     max_length=60,
@@ -41,6 +41,7 @@ print("--------------")
 print(text)
 print("--------------")
 
+# a .env is used to store the keys, implement your own here
 api = Api(
     consumer_key=os.environ.get("CONSUMER_KEY"),
     consumer_secret=os.environ.get("CONSUMER_SECRET"),

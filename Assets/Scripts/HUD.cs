@@ -22,7 +22,7 @@ public class HUD : MonoBehaviour
             score -= 5;
             size = 2 * score;
             Sound.playClip();
-            //Tweet.Post();
+            Tweet.Post();
         }
         if (score >= 5)
         {
