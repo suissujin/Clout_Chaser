@@ -14,8 +14,12 @@ public class movement : MonoBehaviour
     public int initialSize;
     private int rotAngle;
     private int loopCatch;
+    private bool soundTime;
     public Collider2D gridArea;
     public HUD hud;
+    public sound Sound;
+    public sound Sound2;
+    public sound Sound3;
 
     public SpriteRenderer spriteRenderer;
 
@@ -27,85 +31,98 @@ public class movement : MonoBehaviour
 
     private void Update()
     {
-        if(hud.endscreen.activeSelf == false)
+        if (hud.endscreen.activeSelf == false)
         {
-        if (direction.x != 0f)
-        {
-            if (Input.GetKeyDown(KeyCode.W) || Input.GetKeyDown(KeyCode.UpArrow))
+            soundTime = true;
+            if (direction.x != 0f)
             {
-                //Debug.Log("UP");
-                input = Vector2.up;
-                rotAngle = 270;
-                spriteRenderer.flipX = false;
-                sprite.Rotate(0, 0, rotAngle);
+                if (Input.GetKeyDown(KeyCode.W) || Input.GetKeyDown(KeyCode.UpArrow))
+                {
+                    //Debug.Log("UP");
+                    input = Vector2.up;
+                    rotAngle = 270;
+                    spriteRenderer.flipX = false;
+                    sprite.Rotate(0, 0, rotAngle);
+                }
+                else if (Input.GetKeyDown(KeyCode.S) || Input.GetKeyDown(KeyCode.DownArrow))
+                {
+                    //Debug.Log("DOWN");
+                    input = Vector2.down;
+                    rotAngle = 90;
+                    spriteRenderer.flipX = false;
+                    sprite.Rotate(0, 0, rotAngle);
+                }
             }
-            else if (Input.GetKeyDown(KeyCode.S) || Input.GetKeyDown(KeyCode.DownArrow))
+            // Only allow turning left or right while moving in the y-axis
+            else if (direction.y != 0f)
             {
-                //Debug.Log("DOWN");
-                input = Vector2.down;
-                rotAngle = 90;
-                spriteRenderer.flipX = false;
-                sprite.Rotate(0, 0, rotAngle);
+                if (Input.GetKeyDown(KeyCode.D) || Input.GetKeyDown(KeyCode.RightArrow))
+                {
+                    //Debug.Log("RIGHT");
+                    input = Vector2.right;
+                    sprite.Rotate(0, 0, -rotAngle);
+                    spriteRenderer.flipX = true;
+                }
+                else if (Input.GetKeyDown(KeyCode.A) || Input.GetKeyDown(KeyCode.LeftArrow))
+                {
+                    //Debug.Log("LEFT");
+                    input = Vector2.left;
+                    sprite.Rotate(0, 0, -rotAngle);
+                    spriteRenderer.flipX = false;
+                }
             }
-        }
-        // Only allow turning left or right while moving in the y-axis
-        else if (direction.y != 0f)
-        {
-            if (Input.GetKeyDown(KeyCode.D) || Input.GetKeyDown(KeyCode.RightArrow))
-            {
-                //Debug.Log("RIGHT");
-                input = Vector2.right;
-                sprite.Rotate(0,0,-rotAngle);
-                spriteRenderer.flipX = true;
-            }
-            else if (Input.GetKeyDown(KeyCode.A) || Input.GetKeyDown(KeyCode.LeftArrow))
-            {
-                //Debug.Log("LEFT");
-                input = Vector2.left;
-                sprite.Rotate(0,0,-rotAngle);
-                spriteRenderer.flipX = false;
-            }
-        }
         }
         if (Input.GetKeyDown(KeyCode.R))
         {
             ResetState();
         }
-         if (segments.Count <= 4 && cutSegments.Count == 0 && hud.score < 5)
+        if (Input.GetKeyDown(KeyCode.Escape))
         {
-           hud.endscreen.SetActive(true);
+            Application.Quit();
+        }
+        if (segments.Count <= 4 && cutSegments.Count == 0 && hud.score < 5)
+        {
+            hud.endscreen.SetActive(true);
+            if (soundTime)
+            {
+                Sound2.playClip();
+                soundTime = false;
+            }
         }
     }
 
     private void FixedUpdate()
     {
-        if(hud.endscreen.activeSelf == false)
+        if (hud.endscreen.activeSelf == false)
         {
-        // Set the new direction based on the input
-        if (input != Vector2.zero)
-        {
-            direction = input;
-        }
+            // Set the new direction based on the input
+            if (input != Vector2.zero)
+            {
+                direction = input;
+            }
 
-        // Set each segment's position to be the same as the one it follows. We
-        // must do this in reverse order so the position is set to the previous
-        // position, otherwise they will all be stacked on top of each other.
-        for (int i = segments.Count - 1; i > 0; i--)
-        {
-            segments[i].position = segments[i - 1].position;
-        }
+            // Set each segment's position to be the same as the one it follows. We
+            // must do this in reverse order so the position is set to the previous
+            // position, otherwise they will all be stacked on top of each other.
+            for (int i = segments.Count - 1; i > 0; i--)
+            {
+                segments[i].position = segments[i - 1].position;
+            }
 
-        // Move the snake in the direction it is facing
-        // Round the values to ensure it aligns to the grid
-        float x = Mathf.Round(transform.position.x) + direction.x;
-        float y = Mathf.Round(transform.position.y) + direction.y;
+            // Move the snake in the direction it is facing
+            // Round the values to ensure it aligns to the grid
+            float x = Mathf.Round(transform.position.x) + direction.x;
+            float y = Mathf.Round(transform.position.y) + direction.y;
 
-        transform.position = new Vector2(x, y);
+            transform.position = new Vector2(x, y);
+            Sound.playClip();
         }
     }
 
     public void ResetState()
     {
+
+        Sound3.playClip();
         hud.endscreen.SetActive(false);
         hud.score = 0;
         sprite.Rotate(0, 0, -rotAngle);
@@ -123,8 +140,8 @@ public class movement : MonoBehaviour
         for (int i = 1; i < initialSize; i++)
         {
             Transform segment = Instantiate(this.segmentPrefab);
-            
-            if (loopCatch < 100000) 
+
+            if (loopCatch < 100000)
             {
                 Bounds bounds = gridArea.bounds;
                 do
@@ -133,18 +150,18 @@ public class movement : MonoBehaviour
                     segment.position = segments[i - 1].position;
                     if (Random.Range(0, 2) == 0)
                     {
-                    	segment.position = new Vector2(segment.position.x + Random.Range(-1, 2), segment.position.y);
-                	}
-                	else
-                	{
-                    	segment.position = new Vector2(segment.position.x, segment.position.y + Random.Range(-1, 2));
-                	}
-            	} while (segments.Any(s => s.position == segment.position) && !bounds.Contains(segment.position));
+                        segment.position = new Vector2(segment.position.x + Random.Range(-1, 2), segment.position.y);
+                    }
+                    else
+                    {
+                        segment.position = new Vector2(segment.position.x, segment.position.y + Random.Range(-1, 2));
+                    }
+                } while (segments.Any(s => s.position == segment.position) && !bounds.Contains(segment.position));
             }
-            else 
+            else
             {
                 segment.position = segments[i - 1].position;
-                segment.position = new Vector2(-5,-5);
+                segment.position = new Vector2(segment.position.x - 1, segment.position.y);
             }
             segments.Add(segment);
         }

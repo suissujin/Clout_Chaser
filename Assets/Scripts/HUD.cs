@@ -10,6 +10,7 @@ public class HUD : MonoBehaviour
     public Sprite[] sprites;
     public Transform meter;
     public GameObject endscreen;
+    public sound Sound;
     private int size = 1;
     private Vector3 scale;
 
@@ -20,7 +21,8 @@ public class HUD : MonoBehaviour
         {
             score -= 5;
             size = 2 * score;
-
+            Sound.playClip();
+            //Tweet.Post();
         }
         if (score >= 5)
         {
@@ -32,7 +34,7 @@ public class HUD : MonoBehaviour
             spriteRendererButton.sprite = sprites[1];
         }
 
-        if (size <= 11)
+        if (size <= 10)
         {
             // Debug.Log(size.ToString() + "meter scale");
             meter.localScale = scale;
